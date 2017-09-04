@@ -9,6 +9,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def fillInData(self,tableWidget,player):
+    #Takes the tableWidget and a string with the players name
+
     url = scraper.findPlayer(player)
     if url is None:
         self.statusLabel.setText("None Found")

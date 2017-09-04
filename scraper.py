@@ -1,37 +1,59 @@
 
-import requests, bs4, re, logging
+import requests
+import bs4
+import re
+import logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+#Base url of the website that is scraped
 website = "https://www.hockey-reference.com"
 #The url that will take a search query
 baseUrl = "https://www.hockey-reference.com/search/search.fcgi?search="
 
 class searchResult:
+    """Class that transports the results of a vague search with multiple results"""
+
     def __init__(self,name,url,lastPlayed):
         self.name = name
         self.url = url
         self.lastPlayed = lastPlayed
+
 class tableData:
+    """Class that holds the data for a table.
+    Has separate variables for the column names and actual stats
+    """
+
     def __init__(self,columnNames,allStats):
+        """Initializes the tableData object with a list of columns
+        and all the stats in a 2d rectangle list
+        """
         self.columns = columnNames
         self.stats = allStats
+
     def __str__(self):
+        """Returns the number of seasons that player has played"""
         return str(len(self.rows)) + " Seasons"
+
 class playerInfo:
+    """Class that holds a players info as it is gathered online"""
+
     def __init__(self,pageUrl):
-        #TableData object
+        """Stats is a 2d list that is gathered by getStats
+        url is the website url of the player being gathered from
+        """
         self.stats = None
-        #URl to the player
         self.url = pageUrl
+
     def getPlayerInfo(self):
+        """Takes the url, makes it into a BeautifulSoup object through connect
+        page and then gathers the stats from the page through getStats
+        """
         playerPage = connectToPage(self.url)
         self.stats = getStats(playerPage,self.url)
 
-
-#Returns the parsed html content of the page that can be searched
 def connectToPage(pageUrl):
-    #pageUrl = "https://www.hockey-reference.com/players/o/ovechal01.html"
-    #pageUrl = "https://www.google.com"
+    """Takes any given url and parses it into a bs4.BeautifulSoup object"""
     gotPage = requests.get(pageUrl)
 
     #If the website isn't reached ends the program
@@ -39,6 +61,7 @@ def connectToPage(pageUrl):
 
     #parses the webpage and gets its text
     textFromPage = bs4.BeautifulSoup(gotPage.text, "html.parser")
+    print(type(textFromPage))
     return textFromPage
 
 def getStats(page, url = None):
@@ -131,7 +154,7 @@ def getTableData(tableInfo,length,height):
 #Takes a string from a user input to search for a player
 #Will return None if there were no results
 #Will return a string if there was only one result
-#Will return a searchresult object if there were multiple players found
+#Will return a searchResult object if there were multiple players found
 def findPlayer(playerName):
     #Will take the user input string in the gui
     searchPage = requests.get(baseUrl+playerName)
