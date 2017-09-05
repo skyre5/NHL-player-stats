@@ -4,7 +4,6 @@ import bs4
 import re
 import logging
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 #Base url of the website that is scraped
 website = "https://www.hockey-reference.com"
@@ -24,16 +23,16 @@ class tableData:
     Has separate variables for the column names and actual stats
     """
 
-    def __init__(self,columnNames,allStats):
-        """Initializes the tableData object with a list of columns
+    def __init__(self,name,allStats):
+        """Initializes the tableData object with a name
         and all the stats in a 2d rectangle list
         """
-        self.columns = columnNames
+        self.name = name
         self.stats = allStats
 
     def __str__(self):
         """Returns the number of seasons that player has played"""
-        return str(len(self.rows)) + " Seasons"
+        return self.name
 
 class playerInfo:
     """Class that holds a players info as it is gathered online"""
@@ -54,6 +53,7 @@ class playerInfo:
 
 def connectToPage(pageUrl):
     """Takes any given url and parses it into a bs4.BeautifulSoup object"""
+    logger.info("Accessing data on " + pageUrl)
     gotPage = requests.get(pageUrl)
 
     #If the website isn't reached ends the program
@@ -61,11 +61,30 @@ def connectToPage(pageUrl):
 
     #parses the webpage and gets its text
     textFromPage = bs4.BeautifulSoup(gotPage.text, "html.parser")
-    print(type(textFromPage))
     return textFromPage
 
-def getStats(page, url = None):
-    #finds the basic stat table
+def getTables(page):
+    """Gets all the tables from a given page(BeautifulSoup4 Object"""
+    returnData = []
+    tablesFromPage = page.findAll('div', attrs={'class' : 'table_wrapper'})
+    print(tablesFromPage[3])
+    print(tablesFromPage[3].get('table'))
+    exit()
+    for divs in tablesFromPage:
+        data = [[]]
+        #getColumns(table,data)
+        title = divs.find('h2')
+        if title:
+            print(title.contents[0])
+
+def getColumns(table,data):
+    columnHeaders = table.findAll('th', attrs={'scope': 'col'})
+    for columnNames in columnHeaders:
+        data[0].append(columnNames['aria-label'])
+
+
+def getStats(page, url):
+    """Takes a beautiful object and returns a table of stats"""
     table = page.find('table', attrs={'id' : 'stats_basic_plus_nhl'})
 
     #Checks if the table may be different in the case of an older player having a different id for their stats
@@ -74,9 +93,11 @@ def getStats(page, url = None):
         table = page.find('table', attrs={'id': 'stats_basic_nhl'})
     #If there is no info to gather after both tries it logs the url that failed so it can be inspected
     #Will later upload this to a database so it can gather all fringe cases
+
     if not table:
-        logger.info("Failed to find the table on this url\n" + url)
+        logger.error("Failed to find the table on this url\n" + url)
         raise Exception("Failed to find table")
+
     #Gathers to column names from the table
     #Could be expanded into a function with better functionality
     columnSection = table.findAll('th', attrs={'scope': 'col'})
@@ -195,6 +216,6 @@ def findPlayer(playerName):
 if __name__ == "__main__":
     url = findPlayer("Ovechkin")
     page = connectToPage(url)
-    table = getStats(page)
+    table = getTables(page)
 
 
