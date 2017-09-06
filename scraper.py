@@ -66,22 +66,59 @@ def connectToPage(pageUrl):
 def getTables(page):
     """Gets all the tables from a given page(BeautifulSoup4 Object"""
     returnData = []
+    names = []
     tablesFromPage = page.findAll('div', attrs={'class' : 'table_wrapper'})
-    print(tablesFromPage[3])
-    print(tablesFromPage[3].get('table'))
-    exit()
     for divs in tablesFromPage:
+        table = divs.find('table')
+        if not table:
+            """The data in the comment is up to date and was the only way to access the data
+            I believe the issue was due to javascript loading in this data after the state
+            this program has"""
+            placeholder = divs.find(text = lambda text:isinstance(text,bs4.Comment))
+            html = bs4.BeautifulSoup(placeholder,'html.parser')
+            table = html.find('table')
         data = [[]]
-        #getColumns(table,data)
+        getColumns(table,data)
         title = divs.find('h2')
-        if title:
-            print(title.contents[0])
+        if title is None:
+            if names[-1] == "Similarity Scores":
+                names[-1] = "Similarity Scores By Career Length"
+                names.append("Similarity Scores By Career")
+            else:
+                title = names[-1] + " (2)"
+                logger.info("Additional table created called " + title)
+        else:
+            title = title.contents[0]
+        names.append(title)
+        newGetStats(table,data)
+        cleanTable(data)
+def cleanTable(data):
+    print(data[3][-1])
+    cleanHtml = re.compile('<.*?>')
+    for y in range(len(data)):
+        for x in range(len(data[0])):
+            data[y][x] = re.sub(cleanHtml, '',str(data[y][x]))
+    exit()
 
 def getColumns(table,data):
     columnHeaders = table.findAll('th', attrs={'scope': 'col'})
     for columnNames in columnHeaders:
         data[0].append(columnNames['aria-label'])
 
+def newGetStats(table,data):
+    tableRows = table.findAll('tr', attrs={'class': ''})
+    tableRows.pop(0)
+    tableHeight = len(tableRows)
+    tableWidth = len(data[0])
+    for i, rows in enumerate(tableRows):
+        header = rows.find('th').contents[0]
+        data.append([header])
+        for cols in rows.findAll('td'):
+            if not cols.contents:
+                data[i + 1].append("")
+            else:
+                data[i + 1].append(cols.contents[0])
+    return data
 
 def getStats(page, url):
     """Takes a beautiful object and returns a table of stats"""
@@ -162,12 +199,14 @@ def getTableData(tableInfo,length,height):
     data = [[None for x in range(length)] for y in range(height)]
     for y, row in enumerate(tableInfo):
         for x, col in enumerate(row):
+
+            print(col.contents)
             # Makes the null values in the table set to 0
             # Such as faceoffs for wingers if they never took one in a given year
-            if not col.contents:
-                data[y][x] = ["0"]
-                continue
-            data[y][x] = col.contents
+            #if not col.contents:
+                #data[y][x] = ["0"]
+                #continue
+            #data[y][x] = col.contents
     return data
 
 
