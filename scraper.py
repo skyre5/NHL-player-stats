@@ -93,11 +93,11 @@ def getTables(page):
         newGetStats(table,data)
         cleanTable(data)
 def cleanTable(data):
-    print(data[3][-1])
     cleanHtml = re.compile('<.*?>')
     for y in range(len(data)):
         for x in range(len(data[0])):
             data[y][x] = re.sub(cleanHtml, '',str(data[y][x]))
+    print(data)
     exit()
 
 def getColumns(table,data):
@@ -107,17 +107,25 @@ def getColumns(table,data):
 
 def newGetStats(table,data):
     tableRows = table.findAll('tr', attrs={'class': ''})
+    #Pops a repeat of the column names from the Rows
     tableRows.pop(0)
-    tableHeight = len(tableRows)
-    tableWidth = len(data[0])
+    #tableHeight = len(tableRows)
+    #tableWidth = len(data[0])
     for i, rows in enumerate(tableRows):
         header = rows.find('th').contents[0]
         data.append([header])
         for cols in rows.findAll('td'):
             if not cols.contents:
+                #If the data is null in the table appends a blank string
                 data[i + 1].append("")
             else:
-                data[i + 1].append(cols.contents[0])
+                if len(cols.contents) > 1:
+                    #Only for the awards category will make the list of Tags into Strings
+                    #Which can use the join function to make it into one long string
+                    rowInfo = ''.join(str(v) for v in cols.contents)
+                else:
+                    rowInfo = cols.contents[0]
+                data[i + 1].append(rowInfo)
     return data
 
 def getStats(page, url):
