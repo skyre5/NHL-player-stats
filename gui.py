@@ -19,19 +19,21 @@ def fillInData(self,tableWidget,player):
         player = scraper.playerInfo(url[0].url)
     else:
         player = scraper.playerInfo(url)
+    #Connects to the webpage and gathers the stats
     player.getPlayerInfo()
-    tableData = player.stats
-    tableWidget.setRowCount(len(tableData.stats))
-    tableWidget.setColumnCount(len(tableData.columns))
-    for i,name in enumerate(tableData.columns):
+    tableData = player.stats[0]
+
+    tableWidget.setRowCount(len(tableData.stats)-1)
+    tableWidget.setColumnCount(len(tableData.stats[0]))
+    for i,name in enumerate(tableData.stats[0]):
         tableWidget.setHorizontalHeaderItem(i,QtGui.QTableWidgetItem(name))
     #for x, row in enumerate(tableData.stats):
         #for y, col in enumerate(tableData.stats[0]):
     statsTable = tableData.stats
-    for x,row in enumerate(statsTable):
+    for x,row in enumerate(statsTable[1:]):
         for y, name in enumerate(row):
             try:
-                tableWidget.setItem(x,y,QtGui.QTableWidgetItem(name[0]))
+                tableWidget.setItem(x,y,QtGui.QTableWidgetItem(name))
             except Exception as e:
                 print(e)
 
@@ -46,7 +48,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
-        fillInData(self, self.tableWidget,"Hall")
+        fillInData(self, self.tableWidget,"Crosby")
         self.pushButton.clicked.connect(self.handleButton)
     def handleButton(self):
         text = self.lineEdit.text()

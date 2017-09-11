@@ -31,7 +31,7 @@ class tableData:
         self.stats = allStats
 
     def __str__(self):
-        """Returns the number of seasons that player has played"""
+        """Returns the name of the table"""
         return self.name
 
 class playerInfo:
@@ -49,7 +49,8 @@ class playerInfo:
         page and then gathers the stats from the page through getStats
         """
         playerPage = connectToPage(self.url)
-        self.stats = getStats(playerPage,self.url)
+        #self.stats = getStats(playerPage,self.url)
+        self.stats = getTables(playerPage)
 
 def connectToPage(pageUrl):
     """Takes any given url and parses it into a bs4.BeautifulSoup object"""
@@ -83,6 +84,7 @@ def getTables(page):
         if title is None:
             if names[-1] == "Similarity Scores":
                 names[-1] = "Similarity Scores By Career Length"
+                title = "Similarity Scores By Career"
                 names.append("Similarity Scores By Career")
             else:
                 title = names[-1] + " (2)"
@@ -92,13 +94,15 @@ def getTables(page):
         names.append(title)
         newGetStats(table,data)
         cleanTable(data)
+        returnData.append(tableData(title,data))
+    return returnData
+
 def cleanTable(data):
     cleanHtml = re.compile('<.*?>')
     for y in range(len(data)):
         for x in range(len(data[0])):
             data[y][x] = re.sub(cleanHtml, '',str(data[y][x]))
-    print(data)
-    exit()
+    return(data)
 
 def getColumns(table,data):
     columnHeaders = table.findAll('th', attrs={'scope': 'col'})
