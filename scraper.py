@@ -98,6 +98,7 @@ def getTables(page):
         returnData.append(tableData(title,data))
     return returnData
 
+
 def cleanTable(data):
     """Cleans out any tags from the table such as bold numbers when player leads the league"""
     cleanHtml = re.compile('<.*?>')
