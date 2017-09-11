@@ -2,8 +2,14 @@
 #Build a database connection
 #Be able to list off any table on a given players page
 
-import sys, scraper, logging
-from PyQt4 import QtCore, QtGui, uic
+
+import logging
+import sys
+
+from PyQt4 import QtGui, uic
+
+import scraper
+
 #Sets up the logging system for the program
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -14,14 +20,15 @@ def fillInData(self,tableWidget,player):
     url = scraper.findPlayer(player)
     if url is None:
         self.statusLabel.setText("None Found")
+        return
     elif isinstance(url[0], scraper.searchResult):
         self.statusLabel.setText(str(len(url)) + " Players Found")
-        player = scraper.playerInfo(url[0].url)
+        playerInfo = scraper.playerInfo(url[0].url)
     else:
-        player = scraper.playerInfo(url)
+        playerInfo = scraper.playerInfo(url)
     #Connects to the webpage and gathers the stats
-    player.getPlayerInfo()
-    tableData = player.stats[0]
+    playerInfo.getPlayerInfo()
+    tableData = playerInfo.stats[0]
 
     tableWidget.setRowCount(len(tableData.stats)-1)
     tableWidget.setColumnCount(len(tableData.stats[0]))

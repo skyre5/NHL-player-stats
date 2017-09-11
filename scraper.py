@@ -1,8 +1,9 @@
 
-import requests
-import bs4
-import re
 import logging
+import re
+
+import bs4
+import requests
 
 logger = logging.getLogger(__name__)
 #Base url of the website that is scraped
@@ -98,6 +99,7 @@ def getTables(page):
     return returnData
 
 def cleanTable(data):
+    """Cleans out any tags from the table such as bold numbers when player leads the league"""
     cleanHtml = re.compile('<.*?>')
     for y in range(len(data)):
         for x in range(len(data[0])):
