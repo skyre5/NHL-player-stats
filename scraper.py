@@ -55,18 +55,21 @@ class playerInfo:
 
 def connectToPage(pageUrl):
     """Takes any given url and parses it into a bs4.BeautifulSoup object"""
+    
     logger.info("Accessing data on " + pageUrl)
     gotPage = requests.get(pageUrl)
 
     #If the website isn't reached ends the program
     gotPage.raise_for_status()
 
-    #parses the webpage and gets its text
+    #parses the webpage into soup
     textFromPage = bs4.BeautifulSoup(gotPage.text, "html.parser")
     return textFromPage
 
 def getTables(page):
-    """Gets all the tables from a given page(BeautifulSoup4 Object"""
+    """Gets all the tables from a given BeautifulSoup4 Object (SOUP)"""
+    
+    #List of tableData objects which hold the name of the table and 2d stats
     returnData = []
     names = []
     tablesFromPage = page.findAll('div', attrs={'class' : 'table_wrapper'})
@@ -100,26 +103,39 @@ def getTables(page):
 
 
 def cleanTable(data):
-    """Cleans out any tags from the table such as bold numbers when player leads the league"""
+    """Cleans out any tags from the table. The examples I founder were
+    hyperlinks for the award or bolding for leading the league in category
+    """
+    
+    #Creates a regex that finds and then subtracts all found tags and contents
     cleanHtml = re.compile('<.*?>')
     for y in range(len(data)):
         for x in range(len(data[0])):
             data[y][x] = re.sub(cleanHtml, '',str(data[y][x]))
-    return(data)
+    #return(data)
 
 def getColumns(table,data):
+    """Turns first row of data into column names"""
+    
+    #Finds all table headers and puts them into a list
     columnHeaders = table.findAll('th', attrs={'scope': 'col'})
     for columnNames in columnHeaders:
         data[0].append(columnNames['aria-label'])
 
 def newGetStats(table,data):
+    """Takes a table container in html and parses it's contents into
+    my 2d list stats table.
+    """
+    
+    #Finds all table rows from within the table. No class.... Damn
     tableRows = table.findAll('tr', attrs={'class': ''})
+    
     #Pops a repeat of the column names from the Rows
     tableRows.pop(0)
-    #tableHeight = len(tableRows)
-    #tableWidth = len(data[0])
+    
     for i, rows in enumerate(tableRows):
         header = rows.find('th').contents[0]
+        #Appends the header into the list as a list so it can be appended to
         data.append([header])
         for cols in rows.findAll('td'):
             if not cols.contents:
@@ -135,78 +151,6 @@ def newGetStats(table,data):
                 data[i + 1].append(rowInfo)
     return data
 
-def getStats(page, url):
-    """Takes a beautiful object and returns a table of stats"""
-    table = page.find('table', attrs={'id' : 'stats_basic_plus_nhl'})
-
-    #Checks if the table may be different in the case of an older player having a different id for their stats
-    #The case that brought this up is Glenn Hall who played in the 1950s
-    if not table:
-        table = page.find('table', attrs={'id': 'stats_basic_nhl'})
-    #If there is no info to gather after both tries it logs the url that failed so it can be inspected
-    #Will later upload this to a database so it can gather all fringe cases
-
-    if not table:
-        logger.error("Failed to find the table on this url\n" + url)
-        raise Exception("Failed to find table")
-
-    #Gathers to column names from the table
-    #Could be expanded into a function with better functionality
-    columnSection = table.findAll('th', attrs={'scope': 'col'})
-    columnNames = []
-    for x,name in enumerate(columnSection):
-        colName = columnSection[x].contents[0]
-        if not colName:
-            continue
-        #columnNames.append(x)
-        columnNames.append(colName)
-
-    #Improves the quality of the column names
-    #EV was used for both goals and assists
-    #If statement makes sure the stats are for a player and not a goalie
-    if columnNames[10] == "EV":
-        for i in range(10,17):
-            if i < 14:
-                columnNames[i] += "G"
-            else:
-                columnNames[i] += "A"
-
-    #Finds the table from this section
-    tableBody = table.find('tbody')
-    #Will list all the years in the table into a list
-    tableRows = tableBody.findAll('tr')
-
-    # Number of years they have played
-    dataHeight = len(tableRows)
-    # Number of stats available
-    # 30 at time of testing
-    dataLength = len(tableRows[0])
-
-    data = getTableData(tableRows,dataLength,dataHeight)
-
-    #A regex object that will strip the html tags that wrap the awards
-    #Also strips a bold tag if that single statistic led the league
-    cleanHtml = re.compile('<.*?>')
-    #Looks through every single item in the lists and strips tags
-    for row in data:
-        for thing in row:
-            thing[0] = re.sub(cleanHtml, '' , str(thing[0]))
-
-    #Will take apart the list for the awards and
-    #Create one concatenated string of all the honors from that year
-    for row in data:
-        #Base string to be added to or not if the player had no award nominations
-        awardStr = ""
-        #Refernces the last item in the row which is always awards
-        awardList = row[-1]
-        for i,thing in enumerate(awardList):
-            awardStr += re.sub(cleanHtml,'',str(thing))
-        #Places the newly constructed string into the awards column of the row
-        row[-1] = [awardStr]
-
-
-    returnStats = tableData(columnNames, data)
-    return returnStats
 
 #Takes the length and height of the column and loads them into a 2d list from the table about stats
 def getTableData(tableInfo,length,height):
