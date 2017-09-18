@@ -112,7 +112,6 @@ def cleanTable(data):
     for y in range(len(data)):
         for x in range(len(data[0])):
             data[y][x] = re.sub(cleanHtml, '',str(data[y][x]))
-    #return(data)
 
 def getColumns(table,data):
     """Turns first row of data into column names"""
@@ -152,43 +151,27 @@ def newGetStats(table,data):
     return data
 
 
-#Takes the length and height of the column and loads them into a 2d list from the table about stats
-def getTableData(tableInfo,length,height):
-    #Constructs the 2d list
-    data = [[None for x in range(length)] for y in range(height)]
-    for y, row in enumerate(tableInfo):
-        for x, col in enumerate(row):
-
-            print(col.contents)
-            # Makes the null values in the table set to 0
-            # Such as faceoffs for wingers if they never took one in a given year
-            #if not col.contents:
-                #data[y][x] = ["0"]
-                #continue
-            #data[y][x] = col.contents
-    return data
-
-
-
-#Takes a string from a user input to search for a player
-#Will return None if there were no results
-#Will return a string if there was only one result
-#Will return a searchResult object if there were multiple players found
 def findPlayer(playerName):
-    #Will take the user input string in the gui
+    '''Takes a string with a players name
+    Returns a list of searchResult objects in case of a conflict
+    Returns a url if a single player was found
+    Returns none if there were no results found
+    '''
     searchPage = requests.get(baseUrl+playerName)
     #Checks to see if it got a valid return
     searchPage.raise_for_status()
+    #Returns in the case of a single player found
     if re.search(r'/players/',searchPage.url):
-        #Returns if that search brings up an exact player
         return searchPage.url
+        
     textFromPage = bs4.BeautifulSoup(searchPage.text, "html.parser")
+    #Finds the container with the search result info
     table = textFromPage.find('div', attrs={'id': 'players'})
+    
     #If there are no search results return none
     if not table:
         return None
-    #A list for all the players the search may have listed
-    #Should always be at least 2 results
+        
     returnList = []
     #Finds all the search-items which lists each player that matched
     players = table.findAll('div', attrs={'class':'search-item'})
@@ -209,8 +192,9 @@ def findPlayer(playerName):
         returnPlayer = searchResult(name,link,team)
         returnList.append(returnPlayer)
     return returnList
-#Test cases to make sure the lookup works
-#Run from the gui.py file to get the proper use of this application
+
+
+
 if __name__ == "__main__":
     url = findPlayer("Ovechkin")
     page = connectToPage(url)
