@@ -7,8 +7,9 @@ def saveTable(name,tableData):
     makeDir(name)
     table = tableData.stats
     tableName = tableData.name + '.csv'
-    tableName = name.replace(" ", "_")
-    with open("Saves/" + name, "w") as f:
+    tableName = tableName.replace(" ", "_")
+    path = "Saves/" + name + "/" + tableName
+    with open(path, "w") as f:
         writer = csv.writer(f,'hockdia')
         writer.writerows(table)
     
