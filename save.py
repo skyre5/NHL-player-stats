@@ -13,6 +13,16 @@ def saveTable(name,tableData):
         writer = csv.writer(f,'hockdia')
         writer.writerows(table)
     
+def saveAllTables(name,listOfTables):
+    for table in listOfTables:
+        saveTable(name,table)
+
+def listAllPlayers():
+    return
+def listTablesFromPlayer(playerId):
+    listOfTables = os.listdir("Saves/" + playerId)
+    print(listOfTables)
+
 def loadTable(name):
     name = name + '.csv'
     name = name.replace(' ', '_')
@@ -32,10 +42,12 @@ def makeDir(path = "Saves"):
 
 if __name__ == '__main__':
     setupSave()
-    url = findPlayer("Ovechkin")
+    url = findPlayer("Tavares")
     page = connectToPage(url)
     name = url.split("/")[-1]
+    #Separates the .html from the name ideally
+    name = name.split(".")[0]
     #TableData object is returned by getTables
     tables = getTables(page)
-    saveTable(name,tables[0])
+    saveAllTables(name,tables)
     
