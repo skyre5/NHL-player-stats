@@ -2,10 +2,12 @@ import csv
 csv.register_dialect('hockdia', delimiter=':')
 import os
 from scraper import *
-def saveTable(tableData):
+
+def saveTable(name,tableData):
+    makeDir(name)
     table = tableData.stats
-    name = tableData.name + '.csv'
-    name = name.replace(" ", "_")
+    tableName = tableData.name + '.csv'
+    tableName = name.replace(" ", "_")
     with open("Saves/" + name, "w") as f:
         writer = csv.writer(f,'hockdia')
         writer.writerows(table)
@@ -18,17 +20,21 @@ def loadTable(name):
         table = list(reader)
     return table
     
-
-def checkIfDirExists():
-    if not os.path.exists("Saves"):
-        os.makedirs("Saves")
+def setupSave():
+    makeDir()
+    
+def makeDir(path = "Saves"):
+    if path != "Saves":
+        path = "Saves/" + path
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 if __name__ == '__main__':
+    setupSave()
     url = findPlayer("Ovechkin")
     page = connectToPage(url)
-    print(page[0])
-    exit()
+    name = url.split("/")[-1]
     #TableData object is returned by getTables
     tables = getTables(page)
-    loadTable('NHL_Standard')
+    saveTable(name,tables[0])
     
