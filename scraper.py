@@ -8,8 +8,10 @@ import requests
 logger = logging.getLogger(__name__)
 #Base url of the website that is scraped
 website = "https://www.hockey-reference.com"
+#website =  "https://www.baseball-reference.com"
 #The url that will take a search query
 baseUrl = "https://www.hockey-reference.com/search/search.fcgi?search="
+#baseUrl = "https://www.baseball-reference.com/search/search.fcgi?hint=&search="
 
 class searchResult:
     """Class that transports the results of a vague search with multiple results"""
@@ -193,11 +195,12 @@ def findPlayer(playerName):
         returnList.append(returnPlayer)
     return returnList
 
-
-
-if __name__ == "__main__":
+def main():
     url = findPlayer("Ovechkin")
     page = connectToPage(url)
     table = getTables(page)
+
+if __name__ == "__main__":
+    main()
 
 
