@@ -58,7 +58,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         fillInData(self, self.tableWidget,"Crosby")
         self.pushButton.clicked.connect(self.handleButton)
+        
     def handleButton(self):
+        '''Handles the search button'''
         text = self.lineEdit.text()
         fillInData(self,self.tableWidget,text)
 

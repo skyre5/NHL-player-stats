@@ -4,6 +4,9 @@ import os
 from scraper import *
 
 def saveTable(name,tableData):
+    '''Saves an individual table to a .csv file to a given directory by playerId
+    and the name of the table which is in the tableData object
+    '''
     makeDir(name)
     table = tableData.stats
     tableName = tableData.name + '.csv'
@@ -14,27 +17,37 @@ def saveTable(name,tableData):
         writer.writerows(table)
     
 def saveAllTables(name,listOfTables):
+    '''Saves all the tables in a list of tableData objects'''
     for table in listOfTables:
         saveTable(name,table)
 
 def listAllPlayers():
-    return
+    '''Lists all the player ids from the saves directory'''
+    listOfTables = os.listdir("Saves/")
+    return listOfTables
+    
 def listTablesFromPlayer(playerId):
+    '''Lists all the tables for a given player and prints them out'''
     listOfTables = os.listdir("Saves/" + playerId)
     print(listOfTables)
 
-def loadTable(name):
+def loadTable(dirName,name):
+    '''Loads a given table from a playerId and the the table wanted into
+    a 2d list
+    '''
     name = name + '.csv'
     name = name.replace(' ', '_')
-    with open("Saves/" + name, 'r') as r:
+    with open("Saves/" + dirName + '/' + name, 'r') as r:
         reader = csv.reader(r,'hockdia')
         table = list(reader)
     return table
     
 def setupSave():
+    '''Makes sure that the save directory exists'''
     makeDir()
     
 def makeDir(path = "Saves"):
+    '''Makes the directory for a given playerId'''
     if path != "Saves":
         path = "Saves/" + path
     if not os.path.exists(path):
@@ -50,4 +63,5 @@ if __name__ == '__main__':
     #TableData object is returned by getTables
     tables = getTables(page)
     saveAllTables(name,tables)
-    
+    x = loadTable('crosbsi01', 'Other Playoffs')
+    print(x)
