@@ -8,10 +8,8 @@ import requests
 logger = logging.getLogger(__name__)
 #Base url of the website that is scraped
 website = "https://www.hockey-reference.com"
-#website =  "https://www.baseball-reference.com"
 #The url that will take a search query
-baseUrl = "https://www.hockey-reference.com/search/search.fcgi?search="
-#baseUrl = "https://www.baseball-reference.com/search/search.fcgi?hint=&search="
+searchUrl = "https://www.hockey-reference.com/search/search.fcgi?search="
 
 class searchResult:
     """Class that transports the results of a vague search with multiple results"""
@@ -159,7 +157,7 @@ def findPlayer(playerName):
     Returns a url if a single player was found
     Returns none if there were no results found
     '''
-    searchPage = requests.get(baseUrl+playerName)
+    searchPage = requests.get(+playerName)
     #Checks to see if it got a valid return
     searchPage.raise_for_status()
     #Returns in the case of a single player found
@@ -195,6 +193,14 @@ def findPlayer(playerName):
         returnList.append(returnPlayer)
     return returnList
 
+'''def setSportLeague(league):
+
+    import constants
+    league = league.upper()
+    if league == 'NHL':
+        website = constants.NHL_BASE
+        searchUrl = constants.NHL_SEARCH
+'''
 def main():
     url = findPlayer("Ovechkin")
     page = connectToPage(url)
