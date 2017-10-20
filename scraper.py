@@ -1,9 +1,9 @@
 
 import logging
 import re
-
 import bs4
 import requests
+import constants
 
 logger = logging.getLogger(__name__)
 #Base url of the website that is scraped
@@ -110,7 +110,7 @@ def cleanTable(data):
     #Creates a regex that finds and then subtracts all found tags and contents
     cleanHtml = re.compile('<.*?>')
     for y in range(len(data)):
-        for x in range(len(data[0])):
+        for x in range(len(data[y])):
             data[y][x] = re.sub(cleanHtml, '',str(data[y][x]))
 
 def getColumns(table,data):
@@ -133,7 +133,10 @@ def newGetStats(table,data):
     tableRows.pop(0)
     
     for i, rows in enumerate(tableRows):
-        header = rows.find('th').contents[0]
+        try:
+            header = rows.find('th').contents[0]
+        except:
+            print()
         #Appends the header into the list as a list so it can be appended to
         data.append([header])
         for cols in rows.findAll('td'):
@@ -157,7 +160,7 @@ def findPlayer(playerName):
     Returns a url if a single player was found
     Returns none if there were no results found
     '''
-    searchPage = requests.get(+playerName)
+    searchPage = requests.get(searchUrl + playerName)
     #Checks to see if it got a valid return
     searchPage.raise_for_status()
     #Returns in the case of a single player found
@@ -205,6 +208,7 @@ def main():
     url = findPlayer("Ovechkin")
     page = connectToPage(url)
     table = getTables(page)
+    print(table[0].stats)
 
 if __name__ == "__main__":
     main()

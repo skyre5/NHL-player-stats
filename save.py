@@ -55,7 +55,7 @@ def makeDir(path = "Saves"):
 
 if __name__ == '__main__':
     setupSave()
-    url = findPlayer("Tavares")
+    url = findPlayer("Ovechkin")
     page = connectToPage(url)
     name = url.split("/")[-1]
     #Separates the .html from the name ideally
@@ -63,5 +63,5 @@ if __name__ == '__main__':
     #TableData object is returned by getTables
     tables = getTables(page)
     saveAllTables(name,tables)
-    x = loadTable('crosbsi01', 'Other Playoffs')
+    x = loadTable('ovechal01', 'Other_Playoffs')
     print(x)
